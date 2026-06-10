@@ -56,7 +56,11 @@ public class AuthController {
 
         LoginResponseDto response = LoginResponseDto.builder()
                 .token(token)
-                .email(user.getEmail())
+                .user(userDto)
+                .token_type("Bearer")
+                .expires_in("3600")
+                .access_token(token)
+                .user(userDto)
                 .build();
 
         return ResponseEntity.ok(response);

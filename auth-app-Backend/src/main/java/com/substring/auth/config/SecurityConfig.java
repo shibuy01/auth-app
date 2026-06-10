@@ -60,6 +60,7 @@ public class SecurityConfig {
 
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
+                            String message = authException.getMessage();
 
                             response.getWriter().write("""
                                     {
