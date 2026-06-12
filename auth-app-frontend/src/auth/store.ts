@@ -10,3 +10,4 @@ type AuthState = {
     user: User | null;
     authStatus:true;
 };
+
