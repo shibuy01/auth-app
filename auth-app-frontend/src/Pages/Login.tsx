@@ -4,6 +4,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Separator } from "../components/ui/separator";
 import { Link, useNavigate } from "react-router";
+import useAuth from "@/auth/store";
 
 import {
   ShieldCheck,
@@ -14,7 +15,6 @@ import {
 import { useState, type ReactElement } from "react";
 import type LoginData from "@/models/LoginData";
 import toast from "react-hot-toast";
-import { loginUser } from "@/services/AuthService";
 
 function Login() {
 
@@ -25,7 +25,8 @@ function Login() {
 
   const [loading, setLoading] = useState(false);
   const[error, setError] = useState<string | null>(null);
-  const nagigate = useNavigate();
+ const login = useAuth((state) => state.login);
+const navigate = useNavigate();
 
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -38,40 +39,44 @@ function Login() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (
+  e: React.FormEvent<HTMLFormElement>
+) => {
+  e.preventDefault();
 
-    setLoading(true);
-    setError(null);
+  setLoading(true);
+  setError(null);
 
-    try{
-
-      //Validation
-      if(data.email.trim()==''){
-        toast.error("Email is required!");
-        return;
-      }
-      if(data.password.trim()==''){
-        toast.error("Password is required!");
-        return;
-      }
-
-      const result = await loginUser(data);
-      console.log("REULT", result);
-      toast.success("sucessfully Login...");
-      setData({
-        email: "",
-        password: "",
-      })
-
-      nagigate("/dashboard");
-
-    } catch(error){
-      toast.error("something went wrong...");
-    } finally {
-      setLoading(false);
+  try {
+    if (data.email.trim() === "") {
+      toast.error("Email is required!");
+      return;
     }
-  };
+
+    if (data.password.trim() === "") {
+      toast.error("Password is required!");
+      return;
+    }
+
+    const result = await login(data);
+
+    console.log("RESULT:", result);
+
+    toast.success("Successfully Login...");
+
+    setData({
+      email: "",
+      password: "",
+    });
+
+    navigate("/dashboard");
+  } catch (error) {
+    console.error(error);
+    toast.error("Something went wrong...");
+  } finally {
+    setLoading(false);
+  }
+};
   
 
   return (
