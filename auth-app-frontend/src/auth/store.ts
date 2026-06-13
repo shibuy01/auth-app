@@ -36,8 +36,6 @@ const useAuth = create<AuthState>()(
         try {
           const response = await loginUser(loginData);
 
-          console.log("LOGIN RESPONSE:", response.data);
-
           set({
             accessToken: response.data.access_token,
             user: response.data.user,

@@ -22,10 +22,11 @@ function Navbar() {
             </div>
             <div className='flex gap-4 items-center'>
                 {
-                    checkLogin() ? 
+                    checkLogin() ? (
                     <>
-                        <NavLink to={"#"}>
-                            {user?.name}
+                        <NavLink to="/dashboard/profile">
+                             {user?.email}
+                             {user?.name}
                         </NavLink>
                         <Button onClick={()=>{
                             logout();
@@ -33,7 +34,7 @@ function Navbar() {
                         }}  size={"sm"} className='cursor-pointer' variant={'outline'}>
                             Logout
                         </Button>
-                    </> : 
+                    </>) : (
                     <>
                         <NavLink to={"/"}>
                             Home
@@ -44,7 +45,7 @@ function Navbar() {
                         <NavLink to={"/signup"}>
                             <Button size={"sm"} className='cursor-pointer' variant={'outline'}>Signup</Button>
                         </NavLink>
-                    </>
+                    </>)
                 }
             </div>
         </nav>
