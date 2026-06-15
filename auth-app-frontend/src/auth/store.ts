@@ -42,7 +42,7 @@ const useAuth = create<AuthState>()(
             authStatus: true,
           });
 
-          console.log("STORE UPDATED");
+          // console.log("USER:", response.data.user);
 
           return response;
         } catch (error) {
@@ -71,10 +71,10 @@ const useAuth = create<AuthState>()(
       checkLogin: () => {
         const state = get();
 
-        console.log("CHECK LOGIN:", {
-          accessToken: state.accessToken,
-          authStatus: state.authStatus,
-        });
+        // console.log("CHECK LOGIN:", {
+        //   accessToken: state.accessToken,
+        //   authStatus: state.authStatus,
+        // });
 
         return !!(state.accessToken && state.authStatus);
       },

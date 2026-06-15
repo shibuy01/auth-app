@@ -1,7 +1,9 @@
 package com.substring.auth.controller;
 
+import com.substring.auth.dtos.LoginRequestDto;
 import com.substring.auth.dtos.LoginResponseDto;
 import com.substring.auth.dtos.UserDto;
+import com.substring.auth.entities.Role;
 import com.substring.auth.entities.User;
 import com.substring.auth.repositories.UserRepo;
 import com.substring.auth.security.JwtService;
@@ -11,12 +13,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
@@ -29,15 +28,16 @@ public class AuthController {
     private final JwtService jwtService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> registerUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> registerUser(
+            @RequestBody UserDto userDto) {
         return ResponseEntity.ok(authService.registerUser(userDto));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(
-            @Valid @RequestBody UserDto userDto) {
+            @Valid @RequestBody LoginRequestDto loginRequest) {
 
-        User user = userRepository.findByEmail(userDto.getEmail());
+        User user = userRepository.findByEmail(loginRequest.getEmail());
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -45,7 +45,7 @@ public class AuthController {
         }
 
         if (!passwordEncoder.matches(
-                userDto.getPassword(),
+                loginRequest.getPassword(),
                 user.getPassword())) {
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -54,13 +54,22 @@ public class AuthController {
 
         String token = jwtService.generateToken(user);
 
+        UserDto responseUser = UserDto.builder()
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .name(user.getName())
+                .image(user.getImage())
+                .provider(user.getProvider())
+                .created_at(user.getCreatedAt())
+                .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
+                .build();
+
         LoginResponseDto response = LoginResponseDto.builder()
                 .token(token)
-                .user(userDto)
                 .token_type("Bearer")
                 .expires_in("3600")
                 .access_token(token)
-                .user(userDto)
+                .user(responseUser)
                 .build();
 
         return ResponseEntity.ok(response);

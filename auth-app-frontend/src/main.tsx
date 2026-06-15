@@ -13,6 +13,7 @@ import RootLayout from "./Pages/RootLayout.tsx";
 import Userlayout from "./Pages/users/Userlayout.tsx";
 import Userhome from "./Pages/users/Userhome.tsx";
 import Userprofile from "./Pages/users/Userprofile.tsx";
+import EditProfile from "./Pages/EditProfile.tsx";
 
 
 createRoot(document.getElementById("root")!).render(
@@ -28,6 +29,7 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/dashboard" element={<Userlayout/>} >
             <Route index element={<Userhome/>} />
             <Route path="/dashboard/profile" element={<Userprofile/>} /> 
+            <Route path="/dashboard/editProfile" element={<EditProfile/>} />
           </Route>
         </Route>
       </Routes>

@@ -60,7 +60,7 @@ const navigate = useNavigate();
 
     const result = await login(data);
 
-    console.log("RESULT:", result);
+    // console.log("RESULT:", result);
 
     toast.success("Successfully Login...");
 

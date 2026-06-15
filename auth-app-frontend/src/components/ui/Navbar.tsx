@@ -25,7 +25,6 @@ function Navbar() {
                     checkLogin() ? (
                     <>
                         <NavLink to="/dashboard/profile">
-                             {user?.email}
                              {user?.name}
                         </NavLink>
                         <Button onClick={()=>{

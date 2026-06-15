@@ -1,13 +1,12 @@
 package com.substring.auth.dtos;
 
 import com.substring.auth.entities.Provider;
-import com.substring.auth.entities.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -17,9 +16,10 @@ import java.util.Set;
 public class UserDto {
 
     private String email;
-    private String name;
     private String password;
+    private String name;
     private String image;
     private Provider provider;
     private Set<String> roles;
+    private LocalDateTime created_at;
 }

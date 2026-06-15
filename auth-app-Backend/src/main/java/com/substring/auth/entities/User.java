@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -36,10 +37,10 @@ public class User {
     private boolean enabled=true;
     @Column(name="user_createdAt")
     @CreationTimestamp
-    private String createdAt;
+    private LocalDateTime createdAt;
     @Column(name="user_updatedAt")
     @UpdateTimestamp
-    private String updatedAt;
+    private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
     private Provider  provider = Provider.LOCAL;

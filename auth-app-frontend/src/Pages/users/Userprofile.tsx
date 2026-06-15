@@ -2,9 +2,11 @@ import useAuth from "@/auth/store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Mail, Calendar, Shield } from "lucide-react";
+import { NavLink } from "react-router";
 
 function UserProfile() {
   const user = useAuth((state) => state.user);
+  console.log("User--------->", user);
 
   const profileImage =
     user?.image?.trim()
@@ -15,8 +17,11 @@ function UserProfile() {
 
   const name = user?.name || "Shibu Kumar";
   const email = user?.email || "shibu@example.com";
-  const provider = user?.provider || "LOCAL";
-  const createdAt = user?.createdAt || "2026-01-01";
+  const provider = user?.provider || "L@CAL";
+  const createdAt = user?.created_at || "2026-01-01";
+  console.log("provider-->", provider)
+  console.log("createdAt-->", createdAt)
+  console.log("After_User_CreatedAt--------->", user?.created_at);
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden relative p-6">
@@ -72,10 +77,12 @@ function UserProfile() {
                   </span>
                 </div>
               </div>
-
-              <Button className="bg-cyan-600 hover:bg-cyan-700">
-                Edit Profile
-              </Button>
+            <NavLink to="/dashboard/editProfile">
+                <Button className="bg-cyan-600 hover:bg-cyan-700">
+                  Edit Profile
+                </Button>
+              </NavLink>
+              
             </div>
           </CardContent>
         </Card>
