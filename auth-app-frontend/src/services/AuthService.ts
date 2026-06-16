@@ -3,20 +3,26 @@ import apiClient from "@/config/ApiClient";
 import type LoginData from "@/models/LoginData";
 import type LoginResponseData from "@/models/LoginResponseData";
 
-//Registor Function...
+//Registor User Function...
 export const registerUser =async (signupData: RegisterData) => {
-    //api call from data
+    //API Call From Data
     const response = await apiClient.post("/auth/register", signupData);
     return response;
 };
 
+
+// Login User Function...
 export const loginUser = async(loginData: LoginData) => {
         
+        // API Call Frome Data
         const responese = await apiClient.post<LoginResponseData>("/auth/login", loginData);
         return responese;
 };
 
+// Logout User Function...
 export const logoutUser = async () => {
+    
+    // API Call Frome Data
     const response = await apiClient.post("/auth/logout");
     return response.data;
 }

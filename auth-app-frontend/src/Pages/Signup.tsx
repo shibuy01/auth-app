@@ -66,7 +66,8 @@ export default function Signup() {
       navigate("/login");
 
      } catch (err) {
-    //   setError("Something went wrong");
+
+    // setError("Something went wrong");
       toast.error("Something went wrong");
     } finally {
       setLoading(false);

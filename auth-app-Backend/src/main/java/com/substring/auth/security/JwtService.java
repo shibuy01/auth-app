@@ -7,6 +7,7 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Data
 public class JwtService {
 
     private final SecretKey secretKey;
@@ -70,7 +72,7 @@ public class JwtService {
     }
 
     // Generate Refresh Token
-    public String generateRefreshToken(User user) {
+    public String generateRefreshToken(User user, String jti) {
 
         Instant now = Instant.now();
 
