@@ -10,6 +10,9 @@ import com.substring.auth.repositories.RefreshTokenRepo;
 import com.substring.auth.repositories.UserRepo;
 import com.substring.auth.security.JwtService;
 import com.substring.auth.service.AuthService;
+import com.substring.auth.service.CookieService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,6 +34,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenRepo refreshTokenRepo;
+    private final CookieService cookieService;
 
     // User Register Function...
     @PostMapping("/register")
@@ -43,7 +47,7 @@ public class AuthController {
     // User Login Function...
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(
-            @Valid @RequestBody LoginRequestDto loginRequest) {
+            @Valid @RequestBody LoginRequestDto loginRequest, HttpServletResponse responses) {
 
         User user = userRepository.findByEmail(loginRequest.getEmail());
 
@@ -77,6 +81,10 @@ public class AuthController {
         String accesstoken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user, refreshTokenOb.getJti());
 
+        // Use Cookies Service To Attach Refresh Token In Cookie
+        cookieService.attachRefreshCookie(responses, refreshToken, (int)jwtService.getRefreshTtlSeconds());
+        cookieService.addNoStoreHeaders(responses);
+
         UserDto responseUser = UserDto.builder()
                 .email(user.getEmail())
                 .password(user.getPassword())
@@ -88,10 +96,11 @@ public class AuthController {
                 .build();
 
         LoginResponseDto response = LoginResponseDto.builder()
-                .token(accesstoken)
+//                .token(accesstoken)
+                .access_token(accesstoken)
+                .refresh_token(refreshToken)
                 .token_type("Bearer")
                 .expires_in("3600")
-                .access_token(accesstoken)
                 .user(responseUser)
                 .build();
 

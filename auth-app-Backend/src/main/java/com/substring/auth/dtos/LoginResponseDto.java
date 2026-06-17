@@ -16,4 +16,5 @@ public class LoginResponseDto {
     private String expires_in;
     private String access_token;
     private UserDto  user;
+    private String refresh_token;
 }
