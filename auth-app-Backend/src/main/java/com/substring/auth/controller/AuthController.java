@@ -1,8 +1,6 @@
 package com.substring.auth.controller;
 
-import com.substring.auth.dtos.LoginRequestDto;
-import com.substring.auth.dtos.LoginResponseDto;
-import com.substring.auth.dtos.UserDto;
+import com.substring.auth.dtos.*;
 import com.substring.auth.entities.RefreshToken;
 import com.substring.auth.entities.Role;
 import com.substring.auth.entities.User;
@@ -17,10 +15,13 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -106,6 +107,27 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
+
+
+    // access and refresh token rename karne ke lie...
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenResponse> refreshToken(
+            @RequestBody(required = false) RefreshTokenRequest body,
+            HttpServletResponse responses,
+            HttpServletRequest request
+    ){
+
+        String refreshToken = readRefreshTokenFromRequest(body, request).orElseThrow(()->new BadCredentialsException("Invalid refresh Token"));
+
+    }
+
+    //this method will read refresh token from request header or body
+    private  Optional<String> readRefreshTokenFromRequest(RefreshTokenRequest body, HttpServletRequest request) {
+        if(request.getCookies() != null) {
+          Optional<String> fromCookie = Arrays.stream(request.getCookies()) Stream<Cookie>
+    }
+
 
     // User Logout Function...
     @PostMapping("/logout")
