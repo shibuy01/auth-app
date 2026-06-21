@@ -9,6 +9,7 @@ import com.substring.auth.repositories.UserRepo;
 import com.substring.auth.security.JwtService;
 import com.substring.auth.service.AuthService;
 import com.substring.auth.service.CookieService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -120,12 +122,54 @@ public class AuthController {
 
         String refreshToken = readRefreshTokenFromRequest(body, request).orElseThrow(()->new BadCredentialsException("Invalid refresh Token"));
 
+        if(!jwtService.isRefreshTokenValid(refreshToken)) {
+            throw new BadCredentialsException("Invalid refresh Token");
+        }
+
+        String jti = jwtService.getJti(refreshToken);
+        UUID userId = jwtService.getUserId(refreshToken);
+        RefreshToken storedRefreshToken = refreshTokenRepo.findByJti(jti).orElseThrow(()->new BadCredentialsException("refresh Token not recognized.."));
+
     }
 
     //this method will read refresh token from request header or body
-    private  Optional<String> readRefreshTokenFromRequest(RefreshTokenRequest body, HttpServletRequest request) {
-        if(request.getCookies() != null) {
-          Optional<String> fromCookie = Arrays.stream(request.getCookies()) Stream<Cookie>
+    private Optional<String> readRefreshTokenFromRequest(
+            RefreshTokenRequest body,
+            HttpServletRequest request) {
+
+        // 1. HttpOnly Cookie (Highest Priority)
+        if (request.getCookies() != null) {
+
+            Optional<String> cookieToken = Arrays.stream(request.getCookies())
+                    .filter(cookie -> Objects.equals(
+                            cookieService.getRefreshTokenCookieName(),
+                            cookie.getName()))
+                    .map(Cookie::getValue)
+                    .map(String::trim)
+                    .filter(token -> !token.isBlank())
+                    .findFirst();
+
+            if (cookieToken.isPresent()) {
+                return cookieToken;
+            }
+        }
+
+        // 2. Request Body
+        if (body != null
+                && body.getRefreshToken() != null
+                && !body.getRefreshToken().isBlank()) {
+
+            return Optional.of(body.getRefreshToken().trim());
+        }
+
+        // 3. Custom Header
+        String refreshHeader = request.getHeader("X-Refresh-Token");
+
+        if (refreshHeader != null && !refreshHeader.isBlank()) {
+            return Optional.of(refreshHeader.trim());
+        }
+
+        return Optional.empty();
     }
 
 
