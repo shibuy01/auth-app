@@ -2,6 +2,7 @@ package com.substring.auth.config;
 
 import com.substring.auth.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +30,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
+
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -47,7 +53,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/v1/auth/register",
-                                "/api/v1/auth/login"
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/refresh"
                         ).permitAll()
                         .requestMatchers("/api/v1/auth/logout").authenticated()
                         .anyRequest().authenticated()

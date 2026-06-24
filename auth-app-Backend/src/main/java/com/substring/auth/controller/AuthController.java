@@ -9,14 +9,17 @@ import com.substring.auth.repositories.UserRepo;
 import com.substring.auth.security.JwtService;
 import com.substring.auth.service.AuthService;
 import com.substring.auth.service.CookieService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +41,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final RefreshTokenRepo refreshTokenRepo;
     private final CookieService cookieService;
+    private final ModelMapper mapper;
 
     // User Register Function...
     @PostMapping("/register")
@@ -122,7 +126,7 @@ public class AuthController {
 
         String refreshToken = readRefreshTokenFromRequest(body, request).orElseThrow(()->new BadCredentialsException("Invalid refresh Token"));
 
-        if(!jwtService.isRefreshTokenValid(refreshToken)) {
+        if(!jwtService.isRefreshToken(refreshToken)) {
             throw new BadCredentialsException("Invalid refresh Token");
         }
 
@@ -130,6 +134,48 @@ public class AuthController {
         UUID userId = jwtService.getUserId(refreshToken);
         RefreshToken storedRefreshToken = refreshTokenRepo.findByJti(jti).orElseThrow(()->new BadCredentialsException("refresh Token not recognized.."));
 
+        if(storedRefreshToken.isRevoked()){
+            throw new BadCredentialsException(" Refresh Token expired and revoked");
+        }
+
+        if(storedRefreshToken.getExpiresAt().isBefore(Instant.now())){
+            throw new BadCredentialsException(" Refresh Token expired ");
+        }
+
+        if(!storedRefreshToken.getUser().getId().equals(userId)){
+            throw new BadCredentialsException("Refresh Token does not belong to this User");
+        }
+
+        // refresh token ko rotate:-
+        storedRefreshToken.setRevoked(true);
+        String newJti = UUID.randomUUID().toString();
+        storedRefreshToken.setReplacedByToken(newJti);
+        refreshTokenRepo.save(storedRefreshToken);
+
+        User user = storedRefreshToken.getUser();
+
+        var newRefreshTokenOb = RefreshToken.builder()
+                .jti(newJti)
+                .user(user)
+                .createdAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(jwtService.getRefreshTtlSeconds()))
+                .revoked(false)
+                .build();
+
+        refreshTokenRepo.save(newRefreshTokenOb);
+        String newAccessToken = jwtService.generateToken(user);
+        String newRefreshToken = jwtService.generateRefreshToken(user, newRefreshTokenOb.getJti());
+
+        cookieService.attachRefreshCookie(responses, newRefreshToken, (int)jwtService.getRefreshTtlSeconds());
+        cookieService.addNoStoreHeaders(responses);
+
+        return ResponseEntity.ok(
+                TokenResponse.of(
+                        newAccessToken,
+                        jwtService.getAccessTtlSeconds(),
+                        mapper.map(user, UserDto.class)
+                )
+        );
     }
 
     //this method will read refresh token from request header or body
@@ -175,7 +221,25 @@ public class AuthController {
 
     // User Logout Function...
     @PostMapping("/logout")
-    public ResponseEntity<String> logout() {
-        return ResponseEntity.ok("Logout successful");
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        readRefreshTokenFromRequest(null,request).ifPresent(token -> {
+            try {
+                if(jwtService.isRefreshToken(token)){
+                    String jti = jwtService.getJti(token);
+                    refreshTokenRepo.findByJti(jti).ifPresent(refreshToken -> {
+                        refreshToken.setRevoked(true);
+                        refreshTokenRepo.save(refreshToken);
+                    });
+                }
+            } catch(JwtException ignored){
+            }
+        });
+
+        // Use CookieUtil (same behavior)
+        cookieService.clearRefreshCookie(response);
+        cookieService.addNoStoreHeaders(response);
+        SecurityContextHolder.clearContext();
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

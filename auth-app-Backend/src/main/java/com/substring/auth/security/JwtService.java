@@ -113,7 +113,7 @@ public class JwtService {
     }
 
     // Validate Refresh Token
-    public boolean isRefreshTokenValid(String token) {
+    public boolean isRefreshToken(String token) {
         Claims claims = parse(token).getBody();
         return "refresh".equals(claims.get("typ", String.class));
     }
