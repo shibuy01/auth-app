@@ -1,5 +1,6 @@
 package com.substring.auth.service;
 
+import com.substring.auth.entities.Role;
 import com.substring.auth.entities.User;
 import com.substring.auth.repositories.UserRepo;
 import lombok.AllArgsConstructor;
@@ -28,7 +29,7 @@ public class UserDetailsService implements org.springframework.security.core.use
                 .password(user.getPassword())
                 .roles(user.getRoles()
                         .stream()
-                        .map(role -> role.getName())
+                        .map(Role::getName)
                         .toArray(String[]::new))
                 .build();
     }
