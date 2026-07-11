@@ -6,7 +6,7 @@ import com.substring.auth.entities.Role;
 import com.substring.auth.entities.User;
 import com.substring.auth.repositories.RefreshTokenRepo;
 import com.substring.auth.repositories.UserRepo;
-import com.substring.auth.security.JwtService;
+import com.substring.auth.service.JwtService;
 import com.substring.auth.service.AuthService;
 import com.substring.auth.service.CookieService;
 import io.jsonwebtoken.JwtException;

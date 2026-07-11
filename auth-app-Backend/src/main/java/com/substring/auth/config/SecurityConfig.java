@@ -1,6 +1,7 @@
 package com.substring.auth.config;
 
 import com.substring.auth.security.JwtAuthenticationFilter;
+import com.substring.auth.security.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,8 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final OAuth2SuccessHandler successHandler;
 
     @Bean
     public ModelMapper modelMapper() {
@@ -59,6 +62,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/logout").authenticated()
                         .anyRequest().authenticated()
                 )
+                .oauth2Login(oauth2 ->
+                                oauth2.successHandler(successHandler)
+                                        .failureHandler(null)
+                        )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(
                         (
                                 HttpServletRequest request,

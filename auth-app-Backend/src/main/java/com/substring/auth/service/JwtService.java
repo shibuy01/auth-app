@@ -1,4 +1,4 @@
-package com.substring.auth.security;
+package com.substring.auth.service;
 
 import com.substring.auth.entities.Role;
 import com.substring.auth.entities.User;

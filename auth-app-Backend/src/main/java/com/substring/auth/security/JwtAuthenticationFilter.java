@@ -1,6 +1,7 @@
 package com.substring.auth.security;
 
 import com.substring.auth.repositories.UserRepo;
+import com.substring.auth.service.JwtService;
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
