@@ -69,6 +69,25 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                     user = userRepository.save(newuser);
                 }
             }
+            case "github" -> {
+                String name =  oAuth2User.getAttributes().getOrDefault("login", "").toString();
+                String email = oAuth2User.getAttributes().getOrDefault("email", "").toString();
+                String githubId = oAuth2User.getAttributes().getOrDefault("id", "").toString();
+                String image = oAuth2User.getAttributes().getOrDefault("avatar_url", "").toString();
+
+                User newuser = User.builder()
+                        .email(email)
+                        .name(name)
+                        .image(image)
+                        .provider(Provider.GITHUB)
+                        .build();
+
+                user = userRepository.findByEmail(email);
+
+                if(user == null){
+                    user = userRepository.save(newuser);
+                }
+            }
             default -> {
                 throw new RuntimeException("Invalid registration id");
             }
